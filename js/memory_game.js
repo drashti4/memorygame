@@ -7,93 +7,154 @@ $(window).load(function () {
     let arrayRandomImageIndex = [];
     let arrayGeneratedImage = [];
     let counters = [];
-    let isOpenedOnce = false
-    /* Initialize all image counter by 0 */
+    let countPairFound = 0;
+    let counterHighestScore = 0;
 
-
-    const listImages = ["file:///C:/isi/JavaScript/MemoryGame/images/arrows.svg",
-        "file:///C:/isi/JavaScript/MemoryGame/images/back.svg",
-        "file:///C:/isi/JavaScript/MemoryGame/images/down-arrow(1).svg",
-        "file:///C:/isi/JavaScript/MemoryGame/images/down-arrow.svg",
-        "file:///C:/isi/JavaScript/MemoryGame/images/refresh.svg",
-        "file:///C:/isi/JavaScript/MemoryGame/images/right.svg",
-        "file:///C:/isi/JavaScript/MemoryGame/images/turn(1).svg",
-        "file:///C:/isi/JavaScript/MemoryGame/images/turn.svg"
+    const listImages = ["images/arrows.svg",
+        "images/back.svg",
+        "images/down-arrow(1).svg",
+        "images/down-arrow.svg",
+        "images/refresh.svg",
+        "images/right.svg",
+        "images/turn(1).svg",
+        "images/turn.svg"
     ];
 
-    let defaultButtons = document.getElementsByClassName('btnDefault');
-    console.log('LOG ' + defaultButtons.length);
 
-    for (let j = 0; j < defaultButtons.length; j++) {
-        counters[j] = 0;
-        defaultButtons[j].setAttribute('isFirstClick', false);
-    }
+    $('.btnNewGame').click(function () {
+        this.value = 'Quit game';
+        $(".row").load();
+        initGame();
+    });
 
-    for (let i = 0; i < defaultButtons.length; i++) {
+    /* Call click function according to number of clicks */
+    function initGame() {
+        updateTime();
+        let countOpenCard = 0;
+        /* Initialize all image counter by 0 */
+        let defaultButtons = document.getElementsByClassName('btnDefault');
 
-        defaultButtons[i].addEventListener('click', function () {
+        for (let j = 0; j < defaultButtons.length; j++) {
+            counters[j] = 0;
+            defaultButtons[j].setAttribute('isFirstClick', "true");
+        }
 
-            console.log('check value ' + defaultButtons[i].getAttribute('isFirstClick')); // print false
-            if (defaultButtons[i].getAttribute('isFirstClick') == false) {
-                console.log('first')
-                addFirstClickListner(defaultButtons[i], defaultButtons, i);
-            }
-
-            if (!defaultButtons[i].getAttribute('isFirstClick')) {
-                console.log('first')
-                addFirstClickListner(defaultButtons[i], defaultButtons, i);
-            }
-
-            if (defaultButtons[i].getAttribute('isFirstClick')) {
-                console.log('second')
-                addMultiClickListener(defaultButtons[i], defaultButtons, i);
-            }
-        });
-    }
-
-    function addFirstClickListner(selectedImage, defaultButtons, index) {
-        console.log('first click index is ' + index);
-        selectedImage.src = getRandomImage();
-        arrayGeneratedImage.push(defaultButtons[index].src);
-        selectedImage.setAttribute('status', 'opened');
-        let timer = addTimer(selectedImage);
-        checkSameImage(defaultButtons, index, timer);
-        selectedImage.setAttribute('isFirstClick', false);
-    }
-
-    function addMultiClickListener(selectedImage, defaultButtons, index) {
-        console.log('second click index is ' + index);
-        selectedImage.src = arrayGeneratedImage[index];
-        selectedImage.setAttribute('status', 'opened');
-        selectedImage.setAttribute('isFirstClick', true);
-        let timer = addTimer(selectedImage);
-        checkSameImage(defaultButtons, index, timer);
-
-    }
-
-    function addTimer(selectedImage) {
-        return setInterval(function () {
-            selectedImage.setAttribute('status', 'closed');
-            selectedImage.src = "images/plain-circle.svg";
-        }, 5000);
-
-    }
-
-    function checkSameImage(defaultButtons, index, timer) {
+        /**Add listener according to click */
         for (let i = 0; i < defaultButtons.length; i++) {
-            if (defaultButtons[i].getAttribute('status') === 'opened') {
-                if (i != index) {
-                    if (defaultButtons[i].src == defaultButtons[index].src) {
-                        console.log("Match found with " + i);
-                        defaultButtons[i].src = arrayGeneratedImage[index];
-                        defaultButtons[i].setAttribute('status', 'solved');
-                        defaultButtons[index].setAttribute('status', 'solved');
-                        clearTimeout(timer);
+
+            if (defaultButtons[i].getAttribute('status') === 'open') {
+                countOpenCard++;
+            }
+
+            if (countOpenCard === 2) {
+                console.log('Wait for 2 second ')
+            }
+            defaultButtons[i].addEventListener('click', function () {
+
+                if (defaultButtons[i].getAttribute('isFirstClick') === "true") {
+                    addFirstClickListner(defaultButtons[i], defaultButtons, i);
+                } else {
+                    addMultiClickListener(defaultButtons[i], defaultButtons, i);
+                }
+            });
+        }
+    }
+
+    function updateTime() {
+        /*$("#lblTimer").text(h + " : " + m + " : " + s);
+        setTimeout(function () {
+            updateTime();
+        }, 500);*/
+    }
+
+    /*This function will called when click happen first time.
+    It takes selected image, it's index and array of all buttons as parameter */
+    function addFirstClickListner(selectedImage, defaultButtons, cuurentOpenedposition) {
+
+        selectedImage.src = getRandomImage();
+        arrayGeneratedImage[cuurentOpenedposition] = defaultButtons[cuurentOpenedposition].src;
+        selectedImage.setAttribute('status', 'opened');
+        selectedImage.setAttribute('isFirstClick', "false");
+
+        for (let symbolCounter = 0; symbolCounter < defaultButtons.length; symbolCounter++) {
+
+            if (defaultButtons[symbolCounter].getAttribute('status') === 'opened' && symbolCounter != cuurentOpenedposition) {
+
+                let timerPreviousImage = addTimer(defaultButtons[symbolCounter]);
+                let timerCurrentImage = addTimer(defaultButtons[cuurentOpenedposition]);
+                checkSameImage(defaultButtons, cuurentOpenedposition, timerCurrentImage);
+            }
+        }
+    }
+
+    /*This function will called when click is not first time.
+    It takes selected image, it's index and array of all buttons as parameter*/
+    function addMultiClickListener(selectedImage, defaultButtons, cuurentOpenedposition) {
+
+        selectedImage.src = arrayGeneratedImage[cuurentOpenedposition];
+        if (selectedImage.getAttribute('status') === 'closed') {
+            selectedImage.setAttribute('status', 'opened');
+        }
+
+        for (let symbolCounter = 0; symbolCounter < defaultButtons.length; symbolCounter++) {
+            if (defaultButtons[symbolCounter].getAttribute('status') === 'opened' && symbolCounter != cuurentOpenedposition) {
+                let timerPreviousImage = addTimer(defaultButtons[symbolCounter]);
+                let timerCurrentImage = addTimer(defaultButtons[cuurentOpenedposition]);
+                checkSameImage(defaultButtons, cuurentOpenedposition, timerPreviousImage, timerCurrentImage);
+            }
+        }
+    }
+
+    /* This function takes selected Image as parameter and set timer for it. */
+    function addTimer(selectedImage) {
+        return setTimeout(function () {
+            if (selectedImage.getAttribute('status') != 'solved') {
+                selectedImage.setAttribute('status', 'closed');
+                selectedImage.src = "images/plain-circle.svg";
+            }
+        }, 2000);
+    }
+
+    /*This function takes all default buttons, selected button's index and it's timer as parameter.
+     It checks wheher the opened image is same as previosly opned image by checking attribute.*/
+    function checkSameImage(defaultButtons, justOpenedPosition, timerPreviousImage, timerCurrentImage) {
+
+        for (let symbolCounter = 0; symbolCounter < defaultButtons.length; symbolCounter++) {
+
+            let cardStatus = defaultButtons[symbolCounter].getAttribute('status');
+
+            if (cardStatus === 'opened') {
+
+                if (symbolCounter != justOpenedPosition) { //To not match itself
+
+                    if (defaultButtons[symbolCounter].src === defaultButtons[justOpenedPosition].src) {
+
+                        console.log("Match found with " + symbolCounter);
+                        clearTimeout(timerPreviousImage);
+                        clearTimeout(timerCurrentImage);
+                        console.log('Time interval cleared');
+                        defaultButtons[symbolCounter].setAttribute('status', 'solved');
+                        defaultButtons[justOpenedPosition].setAttribute('status', 'solved');
+                        countPairFound++;
+                        $('#lblPairFound').html(countPairFound);
+                        counterHighestScore++;
+                        $('#lblHighestScore').html(counterHighestScore);
+
+                    } else {
+
+                        if (counterHighestScore < 1) {
+                            $('#lblHighestScore').html(0);
+                        } else {
+                            counterHighestScore--;
+                            $('#lblHighestScore').html(counterHighestScore);
+                        }
                     }
                 }
             }
         }
     }
+
+
 
     /* This function will return random image from array.*/
     function getRandomImage() {
