@@ -3,13 +3,13 @@
 $(window).load(function () {
 
     let imageIndex;
-    let arrayExcludeNumbers = [];
-    let arrayRandomImageIndex = [];
-    let arrayGeneratedImage = [];
-    let counters = [];
-    let countPairFound = 0;
-    let counterHighestScore = 0;
-
+    let arrayExcludeNumbers ;
+    let arrayRandomImageIndex ;
+    let arrayGeneratedImage ;
+    let defaultButtons = document.getElementsByClassName('btnDefault');
+    let counters;
+    let countPairFound;
+    let counterHighestScore;
     const listImages = ["images/arrows.svg",
         "images/back.svg",
         "images/down-arrow(1).svg",
@@ -17,22 +17,43 @@ $(window).load(function () {
         "images/refresh.svg",
         "images/right.svg",
         "images/turn(1).svg",
-        "images/turn.svg"
-    ];
+        "images/turn.svg"];
 
 
-    $('.btnNewGame').click(function () {
-        this.value = 'Quit game';
-        $(".row").load();
+    $('#btnNewGame').click(function () {
+        let btnText = this.value;
+        if(btnText=='New game'){
+            this.value = 'Quit game';
+        }else{
+            this.value = 'New game';
+        }
+
+        for (let j = 0; j < defaultButtons.length; j++) {
+            if(defaultButtons[j].getAttribute('status')!='closed') {
+                defaultButtons[j].src = "images/plain-circle.svg";
+                defaultButtons[j].setAttribute('status', "closed");
+            }
+        }
+
+        initVariables();
         initGame();
     });
 
-    /* Call click function according to number of clicks */
+    function initVariables(){
+         arrayExcludeNumbers = [];
+         arrayRandomImageIndex = [];
+         arrayGeneratedImage = [];
+        counters= [];
+        countPairFound = 0;
+        counterHighestScore = 0;
+    }
+
+    /** Call click function according to number of clicks */
     function initGame() {
+
         updateTime();
         let countOpenCard = 0;
-        /* Initialize all image counter by 0 */
-        let defaultButtons = document.getElementsByClassName('btnDefault');
+        /** Initialize all image counter by 0 */
 
         for (let j = 0; j < defaultButtons.length; j++) {
             counters[j] = 0;
@@ -41,16 +62,11 @@ $(window).load(function () {
 
         /**Add listener according to click */
         for (let i = 0; i < defaultButtons.length; i++) {
-
-            if (defaultButtons[i].getAttribute('status') === 'open') {
-                countOpenCard++;
-            }
-
-            if (countOpenCard === 2) {
-                console.log('Wait for 2 second ')
-            }
             defaultButtons[i].addEventListener('click', function () {
-
+                let countOpenCard =  getNumberOfOpenedImage(defaultButtons);
+                if (countOpenCard >= 2) {
+                    return;
+                }
                 if (defaultButtons[i].getAttribute('isFirstClick') === "true") {
                     addFirstClickListner(defaultButtons[i], defaultButtons, i);
                 } else {
@@ -58,6 +74,18 @@ $(window).load(function () {
                 }
             });
         }
+    }
+
+    /**This function returns number of image which has opened status*/
+    function getNumberOfOpenedImage(){
+        let countOpenCard = 0;
+        for (let i = 0; i < defaultButtons.length; i++) {
+            let status = defaultButtons[i].getAttribute('status');
+            if ( status === 'opened') {
+                countOpenCard++;
+            }
+        }
+        return countOpenCard;
     }
 
     function updateTime() {
@@ -129,15 +157,13 @@ $(window).load(function () {
 
                     if (defaultButtons[symbolCounter].src === defaultButtons[justOpenedPosition].src) {
 
-                        console.log("Match found with " + symbolCounter);
                         clearTimeout(timerPreviousImage);
                         clearTimeout(timerCurrentImage);
-                        console.log('Time interval cleared');
                         defaultButtons[symbolCounter].setAttribute('status', 'solved');
                         defaultButtons[justOpenedPosition].setAttribute('status', 'solved');
                         countPairFound++;
                         $('#lblPairFound').html(countPairFound);
-                        counterHighestScore++;
+                        counterHighestScore+=5;
                         $('#lblHighestScore').html(counterHighestScore);
 
                     } else {
