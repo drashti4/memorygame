@@ -22,7 +22,6 @@ const listImages = ["images/arrows.svg",
 
 function closeAllCards() {
     for (let j = 0; j < defaultButtons.length; j++) {
-
         defaultButtons[j].src = "images/plain-circle.svg";
         defaultButtons[j].setAttribute('status', "closed");
 
