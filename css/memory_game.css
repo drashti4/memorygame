@@ -137,9 +137,10 @@ img {
 .popup .close:hover {
     color: #06D85F;
 }
-
+col-sm
 .popup .content {
     max-height: 30%;
+    height: 100px;
     overflow: auto;
 }
 
