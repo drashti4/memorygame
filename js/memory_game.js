@@ -9,6 +9,14 @@ let defaultButtons = undefined;
 let counters;
 let countPairFound;
 let counterHighestScore;
+let globalHighestScore = 0;
+let timer;
+const NEW_GAME = 'New Game';
+const QUIT_GAME = 'Quit Game';
+const OPENED = 'opened';
+const SOLVED = 'solved';
+const STATUS = 'status'
+
 const listImages = ["images/arrows.svg",
     "images/back.svg",
     "images/down-arrow(1).svg",
@@ -18,13 +26,11 @@ const listImages = ["images/arrows.svg",
     "images/turn(1).svg",
     "images/turn.svg"];
 
-
-
+/**Closing all cards*/
 function closeAllCards() {
     for (let j = 0; j < defaultButtons.length; j++) {
         defaultButtons[j].src = "images/plain-circle.svg";
-        defaultButtons[j].setAttribute('status', "closed");
-
+        defaultButtons[j].setAttribute(STATUS, "closed");
     }
 }
 
@@ -40,7 +46,6 @@ function initVariables() {
 /** Call click function according to number of clicks */
 function initGame() {
 
-    updateTime();
     let countOpenCard = 0;
     /** Initialize all image counter by 0 */
 
@@ -72,8 +77,8 @@ function initGame() {
 function getNumberOfOpenedImage() {
     let countOpenCard = 0;
     for (let i = 0; i < defaultButtons.length; i++) {
-        let status = defaultButtons[i].getAttribute('status');
-        if (status === 'opened') {
+        let status = defaultButtons[i].getAttribute(STATUS);
+        if (status === OPENED) {
             countOpenCard++;
         }
     }
@@ -81,10 +86,13 @@ function getNumberOfOpenedImage() {
 }
 
 function updateTime() {
-    /*$("#lblTimer").text(h + " : " + m + " : " + s);
-    setTimeout(function () {
-        updateTime();
-    }, 500);*/
+    let start = new Date();
+     timer = setInterval(() => {
+        let now = new Date()
+        now.setTime(new Date().getTime() - start.getTime());
+        console.log(now.getMinutes() + ':' + now.getSeconds());
+        $('#lblTimer').html(now.getMinutes() + ':' + now.getSeconds());
+    }, 100)
 }
 
 /**This function will called when click happen first time. It takes selected image, it's index and array of all buttons as parameter */
@@ -92,12 +100,12 @@ function addFirstClickListner(selectedImage, defaultButtons, cuurentOpenedpositi
 
     selectedImage.src = getRandomImage();
     arrayGeneratedImage[cuurentOpenedposition] = defaultButtons[cuurentOpenedposition].src;
-    selectedImage.setAttribute('status', 'opened');
+    selectedImage.setAttribute(STATUS, OPENED);
     selectedImage.setAttribute('isFirstClick', "false");
 
     for (let symbolCounter = 0; symbolCounter < defaultButtons.length; symbolCounter++) {
 
-        if (defaultButtons[symbolCounter].getAttribute('status') === 'opened' && symbolCounter != cuurentOpenedposition) {
+        if (defaultButtons[symbolCounter].getAttribute(STATUS) === OPENED && symbolCounter != cuurentOpenedposition) {
 
             let timerPreviousImage = addTimer(defaultButtons[symbolCounter]);
             let timerCurrentImage = addTimer(defaultButtons[cuurentOpenedposition]);
@@ -110,12 +118,12 @@ function addFirstClickListner(selectedImage, defaultButtons, cuurentOpenedpositi
 function addMultiClickListener(selectedImage, defaultButtons, cuurentOpenedposition) {
 
     selectedImage.src = arrayGeneratedImage[cuurentOpenedposition];
-    if (selectedImage.getAttribute('status') === 'closed') {
-        selectedImage.setAttribute('status', 'opened');
+    if (selectedImage.getAttribute(STATUS) === 'closed') {
+        selectedImage.setAttribute(STATUS,  OPENED);
     }
 
     for (let symbolCounter = 0; symbolCounter < defaultButtons.length; symbolCounter++) {
-        if (defaultButtons[symbolCounter].getAttribute('status') === 'opened' && symbolCounter != cuurentOpenedposition) {
+        if (defaultButtons[symbolCounter].getAttribute(STATUS) === OPENED && symbolCounter != cuurentOpenedposition) {
             let timerPreviousImage = addTimer(defaultButtons[symbolCounter]);
             let timerCurrentImage = addTimer(defaultButtons[cuurentOpenedposition]);
             checkSameImage(defaultButtons, cuurentOpenedposition, timerPreviousImage, timerCurrentImage);
@@ -126,8 +134,8 @@ function addMultiClickListener(selectedImage, defaultButtons, cuurentOpenedposit
 /** This function takes selected Image as parameter and set timer for it. */
 function addTimer(selectedImage) {
     return setTimeout(function () {
-        if (selectedImage.getAttribute('status') != 'solved') {
-            selectedImage.setAttribute('status', 'closed');
+        if (selectedImage.getAttribute(STATUS) != SOLVED) {
+            selectedImage.setAttribute(STATUS, 'closed');
             selectedImage.src = "images/plain-circle.svg";
         }
     }, 2000);
@@ -138,39 +146,46 @@ function checkSameImage(defaultButtons, justOpenedPosition, timerPreviousImage, 
 
     for (let symbolCounter = 0; symbolCounter < defaultButtons.length; symbolCounter++) {
 
-        let cardStatus = defaultButtons[symbolCounter].getAttribute('status');
+        let cardStatus = defaultButtons[symbolCounter].getAttribute(STATUS);
 
-        if (cardStatus === 'opened') {
+        if (cardStatus === OPENED) {
 
             if (symbolCounter != justOpenedPosition) { //To not match itself
 
-                if (defaultButtons[symbolCounter].src === defaultButtons[justOpenedPosition].src) {
+                if (defaultButtons[symbolCounter].src === defaultButtons[justOpenedPosition].src) { // if two images are equal and position are different.
 
                     clearTimeout(timerPreviousImage);
                     clearTimeout(timerCurrentImage);
-                    defaultButtons[symbolCounter].setAttribute('status', 'solved');
-                    defaultButtons[justOpenedPosition].setAttribute('status', 'solved');
+                    defaultButtons[symbolCounter].setAttribute(STATUS, SOLVED);
+                    defaultButtons[justOpenedPosition].setAttribute(STATUS, SOLVED);
                     countPairFound++;
                     $('#lblPairFound').html(countPairFound);
 
-                    if (countPairFound === 8) {
+                    if (countPairFound === 8) {  // if all pairs are found
+                        if(globalHighestScore<counterHighestScore){
+                            globalHighestScore = counterHighestScore;
+                            alert("You created new high score " + globalHighestScore);
+                            clearInterval(timer);
+                            $('#lblTimer').html('0:0');
+                        }
                         alert("All images are found");
-                        $('#btnNewGame').value = 'New game';
+                        $('#btnNewGame').value = NEW_GAME;
                         $('#lblPairFound').html(0);
                         closeAllCards();
                         initVariables();
                         initGame();
-
                     }
+
                     counterHighestScore += 5;
-                    $('#lblHighestScore').html(counterHighestScore);
+
+                    $('#lblHighestScore').html(globalHighestScore);
 
                 } else {
                     if (counterHighestScore < 1) {
-                        $('#lblHighestScore').html(0);
+                        $('#lblScore').html(0);
                     } else {
                         counterHighestScore--;
-                        $('#lblHighestScore').html(counterHighestScore);
+                        $('#lblScore').html(counterHighestScore);
                     }
                 }
             }
@@ -201,7 +216,7 @@ function getRandomInt(max, excludeArray) {
 
     if (excludeArray != null) {
         for (let i = 0; i < excludeArray.length; i++) {
-            if (excludeArray[i] == randomNumber) {
+            if (excludeArray[i] === randomNumber) {
                 flag = true;
                 break;
             } else {
@@ -221,13 +236,21 @@ $(window).load(function () {
     defaultButtons = document.getElementsByClassName('btnDefault');
     $('#btnNewGame').click(function () {
         let btnText = this.value;
-        if (btnText == 'New game') {
-            this.value = 'Quit game';
+        if (btnText === NEW_GAME) {
+            this.value = QUIT_GAME;
+            updateTime();
+           // $('#sectionRule').style.display='block';
         } else {
-            this.value = 'New game';
+            clearInterval(timer);
+            $('#lblTimer').html('0:0');
+            this.value = NEW_GAME;
         }
         closeAllCards();
         initVariables();
         initGame();
+    });
+
+    $('cancelRules').click(function () {
+        $('#sectionRule').style.display='none';
     });
 });

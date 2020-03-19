@@ -36,12 +36,13 @@
     </tr>
 </table>
 
-<input onclick="document.getElementById('id01').style.display='block'" type="button" id="btnNewGame" class="myButton" value="New Game">
+<input  type="button" id="btnNewGame" class="myButton" value="New Game">
 <table class="tftable">
     <tr>
-        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b> Time:</b> <label id="lblTimer">0</label> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+        <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b> Time:</b> <label id="lblTimer">0:0</label> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
         <th><b>Number of Pair Found:</b> <label id="lblPairFound">0</label></th>
-        <th><b>Higest Score:</b> <label id="lblHighestScore">0</label></th>
+        <th><b>Score:</b> <label id="lblScore">0</label></th>
+        <th><b>Highest Score:</b> <label id="lblHighestScore">0</label></th>
     </tr>
 </table>
 
@@ -80,10 +81,10 @@
 </div>
 
 <div class="w3-container">
-    <div id="id01" class="w3-modal">
+    <div id="sectionRule" class="w3-modal">
         <div class="w3-modal-content">
             <div class="w3-container">
-                <span onclick="document.getElementById('id01').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+                <span id="cancelRules" class="w3-button w3-display-topright">&times;</span>
                 <b>Game Rules:</b>
                 <p>1.Turn over any two cards.</p>
                 <p>2.Watch and remember during the other player's turn.</p>
