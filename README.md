@@ -46,7 +46,7 @@ Thank you so much for visiting this project. :hearts: We hope we can make some i
 
 [1.1]: http://i.imgur.com/wWzX9uB.png (twitter icon with padding)
 
-# [Play Here](https://github.com/drashti4/memorygame)
+# [Play Here](https://drashti4.github.io/memorygame/)
 
 
 
